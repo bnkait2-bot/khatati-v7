@@ -262,5 +262,36 @@ function addChat(role,html){let d=document.createElement('div');d.className='msg
 function clearChat(){$('chatMessages').innerHTML='<div class="msg assistant"><b>خطاطتي</b><p>ابدأ بسؤال جديد وسأرتب الإجابة هنا.</p></div>';state.webAnswer=''}
 document.addEventListener('DOMContentLoaded',()=>{if($('chatInput'))$('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();chatSearch()}})});
 
+<script>
+window.KHATATI_API_URL=localStorage.getItem('khatati_api_url')||'';
+async function askRealAI(q){
+ const url=window.KHATATI_API_URL;
+ if(!url) return null;
+ const r=await fetch(url.replace(/\/$/,'')+'/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+  question:q,level:state.level||'',style:$('answerStyle')?.value||'مفصل',context:$('input')?.value||''
+ })});
+ if(!r.ok) throw new Error('AI '+r.status);
+ return await r.json();
+}
+async function chatSearchReal(){
+ const q=$('chatInput').value.trim();
+ if(!q){toast('اكتب سؤالك أولًا');return}
+ addChat('user','<b>أنت</b><p>'+esc(q)+'</p>');$('chatInput').value='';
+ const box=document.createElement('div');box.className='msg assistant';box.innerHTML='<b>خطاطتي</b><p>🤖 أبحث وأحلل سؤالك…</p>';$('chatMessages').appendChild(box);
+ try{
+  const data=await askRealAI(q);
+  if(!data){return chatSearch()}
+  state.webAnswer=data.answer||'تعذر الحصول على إجابة.';
+  box.innerHTML='<b>خطاطتي</b><span style="font-size:11px;background:#eaf2ff;padding:4px 7px;border-radius:99px">ذكاء اصطناعي حقيقي + بحث ويب</span><h3>الإجابة</h3><p>'+esc(state.webAnswer).replace(/\n/g,'<br>')+'</p><div class="row"><button onclick="useChatAsMap()">🧠 خريطة</button><button onclick="useChatAsLesson()">📚 درس</button><button onclick="makeChatQuiz()">🎯 اختبار</button><button onclick="copyChat()">📋 نسخ</button></div>';
+  if(data.citations)box.innerHTML+='<p class="muted">تم استخدام البحث على الويب عند الحاجة.</p>';
+  $('chatMessages').scrollTop=$('chatMessages').scrollHeight;
+ }catch(e){box.innerHTML='<b>خطاطتي</b><p>تعذر الاتصال بمحرك الذكاء الاصطناعي الآن.</p><p class="muted">تحقق من اتصال الإنترنت وإعداد خادم الذكاء الاصطناعي.</p>';console.error(e)}
+}
+function setAIEndpoint(){
+ const current=localStorage.getItem('khatati_api_url')||'';
+ const v=prompt('ضع رابط خادم خطاطتي، مثال: https://your-server.example.com',current);
+ if(v!==null){localStorage.setItem('khatati_api_url',v.trim());window.KHATATI_API_URL=v.trim();toast('تم حفظ رابط المحرك')}
+}
+</script>
 </script>
 </body></html>
