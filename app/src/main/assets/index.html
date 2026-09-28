@@ -56,7 +56,7 @@ nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid 
 </section>
 
 <section id="settings" class="screen">
-<div class="card"><h2>⚙️ الإعدادات</h2><p class="muted">الإصدار 8.0 — المعالجة الأساسية محلية. لا يتم إرسال دروسك إلى خادم.</p>
+<div class="card"><h2>⚙️ الإعدادات</h2><p class="muted">الإصدار 10.1 — محرك بحث + تحليل محلي + وضع استمرارية. بيانات المشاريع محفوظة على الهاتف.</p>
 <div class="row"><button onclick="exportAll()">💾 تصدير المشاريع</button><button onclick="importAll()">📥 استيراد</button></div>
 <button onclick="clearAll()" style="margin-top:8px;width:100%">مسح جميع المشاريع</button></div>
 </section>
@@ -133,32 +133,87 @@ function importAll(){let i=document.createElement('input');i.type='file';i.accep
 function clearAll(){if(confirm('مسح جميع المشاريع؟')){localStorage.removeItem('kp');renderProjects();toast('تم المسح')}}
 renderProjects();
 
-function quickAsk(q){$('chatInput').value=q+' عن: '+($('input').value.trim()||'الموضوع');$('chatInput').focus()}
+function quickAsk(q){$('chatInput').value=q+' عن: '+($('input').value.trim()||'الموضوع');$('chatInput').focus();chatSearch()}
 function addSourceBadge(){return '<span style="font-size:11px;background:#eef2ff;padding:4px 7px;border-radius:99px">مصادر الويب</span>'}
+function localAnswer(q){
+ const base=$('input').value.trim();
+ const text=base||q;
+ const ss=sentences(text);
+ const ws=words(text);
+ if(!text)return 'اكتب سؤالك أو الصق نص الدرس أولًا.';
+ if(ss.length){
+   const key=ws.slice(0,8).join(' • ');
+   return 'إجابة محلية فورية:\\n'+ss.slice(0,6).join(' ')+'\\n\\nأهم الكلمات: '+(key||'—')+'\\n\\nيمكنك تحويل هذه النتيجة إلى خريطة أو درس أو اختبار.';
+ }
+ return 'فهمت سؤالك: '+q+'\\n\\nلم أجد نصًا كافيًا للتحليل المحلي. عند توفر الإنترنت سأبحث عن مصادر، ويمكنك أيضًا إضافة نص الدرس مباشرة.';
+}
+async function fetchJson(url,ms=9000){
+ const ctl=new AbortController(), timer=setTimeout(()=>ctl.abort(),ms);
+ try{const r=await fetch(url,{signal:ctl.signal,cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);return await r.json()}
+ finally{clearTimeout(timer)}
+}
+function buildResearch(items,style,q){
+ const facts=items.map(x=>String(x.t||'').replace(/\s+/g,' ').trim()).filter(Boolean);
+ if(!facts.length)return null;
+ const joined=facts.join(' ');
+ if(style==='مختصر')return facts.slice(0,3).join(' ');
+ if(style==='مبسّط')return facts.slice(0,5).map((x,i)=>(i+1)+'. '+x).join('\\n');
+ if(style==='خطوة بخطوة')return facts.slice(0,7).map((x,i)=>(i+1)+'. '+x).join('\\n');
+ if(style==='جامعي')return 'السؤال: '+q+'\\n\\nالخلاصة:\\n'+facts.slice(0,7).map((x,i)=>(i+1)+'. '+x).join('\\n')+'\\n\\nملاحظة: هذه خلاصة مصادر الويب وليست حكمًا نهائيًا دون الرجوع للمصادر الأصلية.';
+ return facts.slice(0,7).map((x,i)=>(i+1)+'. '+x).join('\\n\\n');
+}
 async function chatSearch(){
- const q=$('chatInput').value.trim();if(!q)return;
- addChat('user','<b>أنت</b><p>'+esc(q)+'</p>');$('chatInput').value='';
- addChat('assistant','<span class="thinking">🌐 أبحث في الويب وأجمع المعلومات وأرتبها…</span>');
+ const q=$('chatInput').value.trim();
+ if(!q){toast('اكتب سؤالك أولًا');$('chatInput').focus();return}
+ addChat('user','<b>أنت</b><p>'+esc(q)+'</p>');
+ $('chatInput').value='';
+ addChat('assistant','<span class="thinking">🌐 أبحث في المصادر وأرتب الإجابة…</span>');
  const box=$('chatMessages').lastElementChild;
  try{
-  const d=await fetch('https://api.duckduckgo.com/?q='+encodeURIComponent(q)+'&format=json&no_html=1&skip_disambig=1').then(r=>r.json());
-  let items=[];if(d.AbstractText)items.push({t:d.AbstractText,u:d.AbstractURL,n:d.Heading||'DuckDuckGo'});
-  (d.RelatedTopics||[]).forEach(x=>{if(x.Text)items.push({t:x.Text,u:x.FirstURL||'',n:'نتيجة ويب'});});
-  try{const w=await fetch('https://ar.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(q.replace(/\s+/g,'_'))).then(r=>r.ok?r.json():null);if(w&&w.extract)items.push({t:w.extract,u:w.content_urls?.desktop?.page||'',n:'ويكيبيديا'});}catch(e){}
-  items=items.filter(x=>x.t);const seen=new Set();items=items.filter(x=>{const k=x.t.slice(0,120);if(seen.has(k))return false;seen.add(k);return true}).slice(0,7);
-  if(!items.length){box.innerHTML='<b>خطاطتي</b><p>لم أجد معلومات كافية. حاول جعل السؤال أكثر تحديدًا.</p>';return}
-  const style=$('answerStyle').value,facts=items.map(x=>x.t.replace(/\s+/g,' ').trim());
-  let body=style==='مختصر'?facts.slice(0,3).join(' '):style==='مبسّط'?facts.slice(0,5).map((x,i)=>'<b>'+(i+1)+'.</b> '+esc(x)).join('<br>'):style==='خطوة بخطوة'?facts.map((x,i)=>(i+1)+'. '+esc(x)).join('<br>'):facts.map((x,i)=>'<b>'+(i+1)+'.</b> '+esc(x)).join('<br><br>');
-  state.webAnswer=facts.join(' ');
-  const src=items.filter(x=>x.u).map(x=>'<div>🔗 <a href="'+esc(x.u)+'" target="_blank" rel="noopener">'+esc(x.n)+'</a></div>').join('');
-  box.innerHTML='<b>خطاطتي</b> '+addSourceBadge()+'<h3>الإجابة</h3><p>'+body+'</p><div class="row"><button onclick="useChatAsMap()">🧠 خريطة ذهنية</button><button onclick="useChatAsLesson()">📚 درس</button><button onclick="makeChatQuiz()">❓ اختبرني</button><button onclick="copyChat()">📋 نسخ</button></div><div class="source"><b>المصادر:</b>'+src+'</div>';
- }catch(e){box.innerHTML='<b>خطاطتي</b><p>تعذر الوصول إلى الويب. تحقق من اتصال الإنترنت وحاول مرة أخرى.</p>'}
+   let items=[];
+   try{
+     const d=await fetchJson('https://api.duckduckgo.com/?q='+encodeURIComponent(q)+'&format=json&no_html=1&skip_disambig=1');
+     if(d.AbstractText)items.push({t:d.AbstractText,u:d.AbstractURL,n:d.Heading||'DuckDuckGo'});
+     (d.RelatedTopics||[]).forEach(x=>{
+       if(x.Text)items.push({t:x.Text,u:x.FirstURL||'',n:'نتيجة ويب'});
+       (x.Topics||[]).forEach(y=>{if(y.Text)items.push({t:y.Text,u:y.FirstURL||'',n:'نتيجة ويب'})});
+     });
+   }catch(e){}
+   try{
+     const w=await fetchJson('https://ar.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(q.replace(/\s+/g,'_')),7000);
+     if(w&&w.extract)items.push({t:w.extract,u:w.content_urls?.desktop?.page||'',n:'ويكيبيديا'});
+   }catch(e){}
+   const seen=new Set();
+   items=items.filter(x=>x.t&&!seen.has(x.t.slice(0,140))&&(seen.add(x.t.slice(0,140))||true)).slice(0,8);
+   const style=$('answerStyle').value;
+   let answer=buildResearch(items,style,q);
+   let sourceHtml=items.filter(x=>x.u).map(x=>'<div>🔗 <a href="'+esc(x.u)+'" target="_blank" rel="noopener">'+esc(x.n||x.u)+'</a></div>').join('');
+   let sourceLabel=sourceHtml?'<div class="source"><b>المصادر:</b>'+sourceHtml+'</div>':'';
+   if(!answer){
+     answer=localAnswer(q);
+     box.innerHTML='<b>خطاطتي</b> <span style="font-size:11px;background:#fff3cd;padding:4px 7px;border-radius:99px">وضع الاستمرارية</span><h3>الإجابة</h3><p>'+esc(answer).replace(/\n/g,'<br>')+'</p><div class="muted">لم تتوفر نتائج ويب الآن، لذلك أعطيتك تحليلًا محليًا بدل ترك الزر بلا نتيجة.</div>';
+     state.webAnswer=answer;
+   }else{
+     state.webAnswer=items.map(x=>x.t).join(' ');
+     box.innerHTML='<b>خطاطتي</b> '+addSourceBadge()+'<h3>الإجابة</h3><p>'+esc(answer).replace(/\n/g,'<br>')+'</p><div class="row"><button onclick="useChatAsMap()">🧠 خريطة ذهنية</button><button onclick="useChatAsLesson()">📚 درس</button><button onclick="makeChatQuiz()">❓ اختبرني</button><button onclick="copyChat()">📋 نسخ</button></div>'+sourceLabel;
+   }
+   $('chatMessages').scrollTop=$('chatMessages').scrollHeight;
+ }catch(e){
+   const answer=localAnswer(q);
+   state.webAnswer=answer;
+   box.innerHTML='<b>خطاطتي</b><h3>الإجابة</h3><p>'+esc(answer).replace(/\n/g,'<br>')+'</p><div class="muted">وضع الاستمرارية: تم استخدام المحرك المحلي لأن البحث الخارجي لم يستجب.</div><div class="row"><button onclick="useChatAsMap()">🧠 خريطة</button><button onclick="useChatAsLesson()">📚 درس</button><button onclick="makeChatQuiz()">❓ اختبار</button></div>';
+ }
 }
-function useChatAsMap(){if(!state.webAnswer){toast('ابحث أولًا');return}$('input').value=state.webAnswer;state.type='map';generate();show('home')}
-function useChatAsLesson(){if(!state.webAnswer){toast('ابحث أولًا');return}$('input').value=state.webAnswer;state.type='lesson';generate();show('home')}
-function makeChatQuiz(){if(!state.webAnswer){toast('ابحث أولًا');return}$('input').value=state.webAnswer;state.type='quiz';generate();show('home')}
-function copyChat(){navigator.clipboard?.writeText($('chatMessages').innerText);toast('تم نسخ المحادثة')}
+function webAsk(){const q=$('input').value.trim();if(!q){toast('اكتب السؤال أولًا');return}$('chatInput').value=q;chatSearch();$('chatShell').scrollIntoView({behavior:'smooth',block:'start'})}
+function makeMapFromAnswer(){if(!state.webAnswer){toast('استخدم البحث أو المحادثة أولًا');return}$('input').value=state.webAnswer;state.type='map';document.querySelectorAll('#types .chip').forEach(x=>x.classList.toggle('active',x.dataset.v==='map'));generate()}
+function useChatAsMap(){if(!state.webAnswer){toast('ابحث أولًا');return}$('input').value=state.webAnswer;state.type='map';document.querySelectorAll('#types .chip').forEach(x=>x.classList.toggle('active',x.dataset.v==='map'));generate();show('home')}
+function useChatAsLesson(){if(!state.webAnswer){toast('ابحث أولًا');return}$('input').value=state.webAnswer;state.type='lesson';document.querySelectorAll('#types .chip').forEach(x=>x.classList.toggle('active',x.dataset.v==='lesson'));generate();show('home')}
+function makeChatQuiz(){if(!state.webAnswer){toast('ابحث أولًا');return}$('input').value=state.webAnswer;state.type='quiz';document.querySelectorAll('#types .chip').forEach(x=>x.classList.toggle('active',x.dataset.v==='quiz'));generate();show('home')}
+async function copyTextSafe(text){try{await navigator.clipboard.writeText(text);toast('تم النسخ')}catch(e){const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast('تم النسخ')}}
+function copyChat(){copyTextSafe($('chatMessages').innerText)}
 function addChat(role,html){let d=document.createElement('div');d.className='msg '+role;d.innerHTML=html;$('chatMessages').appendChild(d);$('chatMessages').scrollTop=$('chatMessages').scrollHeight}
-function clearChat(){$('chatMessages').innerHTML='<div class="msg assistant"><b>خطاطتي</b><p>ابدأ بسؤال جديد وسأرتب الإجابة هنا.</p></div>'}
-<script>
+function clearChat(){$('chatMessages').innerHTML='<div class="msg assistant"><b>خطاطتي</b><p>ابدأ بسؤال جديد وسأرتب الإجابة هنا.</p></div>';state.webAnswer=''}
+document.addEventListener('DOMContentLoaded',()=>{if($('chatInput'))$('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();chatSearch()}})});
+
+</script>
 </body></html>
