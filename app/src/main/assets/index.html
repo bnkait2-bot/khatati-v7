@@ -22,7 +22,7 @@ nav button{background:transparent;padding:7px 10px;font-size:12px}.hidden{displa
 .project{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee;padding:11px 0}
 </style></head>
 <body>
-<header><div class="brand">✦ خطاطتي</div><div class="sub">مساعدك الدراسي — v7 • يعمل بدون API</div></header>
+<header><div class="brand">✦ خطاطتي</div><div class="sub">مساعدك الدراسي — v7.1 • حل المسائل محليًا بدون API</div></header>
 <main>
 <section id="home">
 <div class="hero"><h1>حوّل درسك إلى خريطة ذهنية</h1><p>اكتب موضوعك، واختر النتيجة التي تريدها. المعالجة محلية على الهاتف وبدون اشتراك.</p></div>
@@ -37,6 +37,13 @@ nav button{background:transparent;padding:7px 10px;font-size:12px}.hidden{displa
 <label>الموضوع أو نص الدرس</label>
 <textarea id="input" placeholder="مثال: دورة الماء في الطبيعة..."></textarea>
 <button class="primary" onclick="generate()">إنشاء الآن ✨</button>
+</div>
+<div class="card">
+<label>🧮 حل مسألة أو سؤال</label>
+<p class="small">اكتب المسألة كما هي، مثل: 25 × 4 أو 2x + 3 = 11 أو 20% من 150.</p>
+<textarea id="question" style="min-height:95px" placeholder="اكتب المسألة هنا..."></textarea>
+<button class="primary" onclick="solveQuestion()">حل المسألة الآن 🧮</button>
+<div id="answer" class="hidden" style="margin-top:12px"></div>
 </div>
 <div id="output" class="card hidden"></div>
 </section>
@@ -71,6 +78,46 @@ function generate(){
  html+='<button class="primary" onclick="saveProject()">💾 حفظ المشروع</button>';
  const o=document.getElementById('output');o.innerHTML=html;o.classList.remove('hidden');o.scrollIntoView({behavior:'smooth'});
  window.current={title,type,mode,level:document.getElementById('level').value,text:t,html};
+}
+function normalizeDigits(s){return String(s).replace(/[٠-٩]/g,d=>String('٠١٢٣٤٥٦٧٨٩'.indexOf(d))).replace(/[٫،]/g,'.').replace(/[−–—]/g,'-').replace(/×/g,'*').replace(/÷/g,'/').replace(/٪/g,'%').replace(/\s+/g,' ').trim()}
+function formatNum(n){return Number.isInteger(n)?String(n):String(Number(n.toFixed(8)))}
+function safeArithmetic(s){
+ s=normalizeDigits(s).replace(/[^0-9+\\-*/().%^ ]/g,'').replace(/\^/g,'**');
+ if(!/[0-9]/.test(s)||/[a-zA-Z]/.test(s)||!/[+*/%^\\-]/.test(s)) return null;
+ try{if(!/^[0-9+\\-*/().%^ *]+$/.test(s))return null; const n=Function('"use strict";return ('+s+')')(); return Number.isFinite(n)?n:null}catch(e){return null}
+}
+function solveLinear(s){
+ s=normalizeDigits(s).replace(/\s/g,'').replace(/×/g,'*');
+ let m=s.match(/^([+-]?[0-9.]*)x([+-][0-9.]+)?=([+-]?[0-9.]+)$/i);
+ if(!m)m=s.match(/^([+-]?[0-9.]+)x([+-][0-9.]+)?=([+-]?[0-9.]+)$/i);
+ if(!m)return null;
+ let a=m[1]===''||m[1]==='+'?1:m[1]==='-'?-1:parseFloat(m[1]);
+ let b=m[2]?parseFloat(m[2]):0, d=parseFloat(m[3]);
+ if(!Number.isFinite(a)||a===0)return null;
+ return (d-b)/a;
+}
+function solveQuestion(){
+ const raw=document.getElementById('question').value.trim(), q=normalizeDigits(raw);
+ const box=document.getElementById('answer');
+ if(!raw){alert('اكتب المسألة أولًا');return}
+ let answer=null, steps='';
+ const percent=q.match(/([0-9.]+)\s*%\s*(?:من|of)\s*([0-9.]+)/i);
+ if(percent){answer=parseFloat(percent[1])*parseFloat(percent[2])/100;steps=percent[1]+'% من '+percent[2]+' = ('+percent[1]+'/100) × '+percent[2]}
+ if(answer===null){
+   const eq=solveLinear(q.replace(/[^0-9xX+\-\.= ]/g,''));
+   if(eq!==null){answer=eq;steps='ننقل العدد الثابت للطرف الآخر ثم نقسم على معامل x.'}
+ }
+ if(answer===null){
+   const expr=q.replace(/(?:احسب|حل|يساوي|=)\s*/g,' ').replace(/[^0-9+\-*/().%^ ]/g,'').trim();
+   answer=safeArithmetic(expr);
+   if(answer!==null)steps='تم ترتيب العملية وتطبيق العمليات الحسابية.'
+ }
+ if(answer===null){
+   box.innerHTML='<div class="node"><b>لم أتعرف على المسألة بعد.</b><br><span class="small">جرّب عملية مثل 125 ÷ 5، أو معادلة مثل 2x + 3 = 11، أو نسبة مثل 20% من 150.</span></div>';
+ }else{
+   box.innerHTML='<div class="node root">✅ الحل: '+escapeHtml(formatNum(answer))+'</div><div class="node"><b>الطريقة:</b><br>'+escapeHtml(steps)+'</div>';
+ }
+ box.classList.remove('hidden'); box.scrollIntoView({behavior:'smooth'});
 }
 function saveProject(){let a=JSON.parse(localStorage.getItem('khatatiProjects')||'[]');a.unshift(window.current);localStorage.setItem('khatatiProjects',JSON.stringify(a.slice(0,30)));alert('تم حفظ المشروع على الهاتف')}
 function renderProjects(){let a=JSON.parse(localStorage.getItem('khatatiProjects')||'[]');document.getElementById('projects').innerHTML=a.length?a.map((p,i)=>'<div class="project"><span>📘 '+escapeHtml(p.title||'مشروع')+'</span><button onclick="openProject('+i+')">فتح</button></div>').join(''):'<p class="small">لا توجد مشاريع محفوظة بعد.</p>'}
