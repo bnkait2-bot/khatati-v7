@@ -22,7 +22,7 @@ nav button{background:transparent;padding:7px 10px;font-size:12px}.hidden{displa
 .project{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee;padding:11px 0}
 </style></head>
 <body>
-<header><div class="brand">✦ خطاطتي</div><div class="sub">مساعدك الدراسي — v7.1 • حل المسائل محليًا بدون API</div></header>
+<header><div class="brand">✦ خطاطتي</div><div class="sub">مساعدك الدراسي — v7.2 • دراسة وحل مسائل محليًا بدون API</div></header>
 <main>
 <section id="home">
 <div class="hero"><h1>حوّل درسك إلى خريطة ذهنية</h1><p>اكتب موضوعك، واختر النتيجة التي تريدها. المعالجة محلية على الهاتف وبدون اشتراك.</p></div>
@@ -35,8 +35,8 @@ nav button{background:transparent;padding:7px 10px;font-size:12px}.hidden{displa
 <button class="tab active" data-type="map">🧠 خريطة</button><button class="tab" data-type="lesson">📚 درس</button><button class="tab" data-type="summary">📝 ملخص</button><button class="tab" data-type="quiz">❓ أسئلة</button>
 </div>
 <label>الموضوع أو نص الدرس</label>
-<textarea id="input" placeholder="مثال: دورة الماء في الطبيعة..."></textarea>
-<button class="primary" onclick="generate()">إنشاء الآن ✨</button>
+<textarea id="input" placeholder="مثال: دورة الماء في الطبيعة..."></textarea><label>📎 إضافة ملف</label><input id="file" type="file" accept=".txt,.md,.csv,image/*" onchange="readLocalFile(this)" style="width:100%;padding:10px;border:1px dashed #ccd2df;border-radius:12px;background:#fafbff">
+<button class="primary" onclick="generate()">إنشاء الآن ✨</button><div id="filePreview" class="small" style="margin-top:8px"></div>
 </div>
 <div class="card">
 <label>🧮 حل مسألة أو سؤال</label>
@@ -75,9 +75,9 @@ function generate(){
    html+='<div class="node root">اختبر نفسك</div>';
    base.forEach((w,i)=>html+='<div class="node"><b>'+(i+1)+'. ما علاقة «'+escapeHtml(w)+'» بالموضوع؟</b><br><span class="small">اكتب إجابتك من الدرس.</span></div>');
  }
- html+='<button class="primary" onclick="saveProject()">💾 حفظ المشروع</button>';
+ html+='<button class="primary" onclick="saveProject()">💾 حفظ المشروع</button><div class="row" style="margin-top:8px"><button onclick="copyOutput()">📋 نسخ</button><button onclick="downloadOutput()">⬇️ تصدير</button></div>';
  const o=document.getElementById('output');o.innerHTML=html;o.classList.remove('hidden');o.scrollIntoView({behavior:'smooth'});
- window.current={title,type,mode,level:document.getElementById('level').value,text:t,html};
+ window.current={title,type,mode,level:document.getElementById('level').value,text:t,html}; document.getElementById('askCard').classList.remove('hidden');
 }
 function normalizeDigits(s){return String(s).replace(/[٠-٩]/g,d=>String('٠١٢٣٤٥٦٧٨٩'.indexOf(d))).replace(/[٫،]/g,'.').replace(/[−–—]/g,'-').replace(/×/g,'*').replace(/÷/g,'/').replace(/٪/g,'%').replace(/\s+/g,' ').trim()}
 function formatNum(n){return Number.isInteger(n)?String(n):String(Number(n.toFixed(8)))}
@@ -118,6 +118,30 @@ function solveQuestion(){
    box.innerHTML='<div class="node root">✅ الحل: '+escapeHtml(formatNum(answer))+'</div><div class="node"><b>الطريقة:</b><br>'+escapeHtml(steps)+'</div>';
  }
  box.classList.remove('hidden'); box.scrollIntoView({behavior:'smooth'});
+}
+function readLocalFile(el){
+ const f=el.files&&el.files[0]; if(!f)return;
+ const p=document.getElementById('filePreview');
+ if(f.type.startsWith('image/')){p.innerHTML='🖼️ تمت إضافة صورة: '+escapeHtml(f.name); return;}
+ const r=new FileReader(); r.onload=()=>{document.getElementById('input').value=String(r.result||'');p.textContent='📄 تمت قراءة الملف: '+f.name}; r.readAsText(f);
+}
+function copyOutput(){
+ const o=document.getElementById('output'); if(!o||o.classList.contains('hidden'))return;
+ navigator.clipboard?.writeText(o.innerText||'').then(()=>alert('تم النسخ'));
+}
+function downloadOutput(){
+ const o=document.getElementById('output'); if(!o||o.classList.contains('hidden'))return;
+ const blob=new Blob([o.innerText||''],{type:'text/plain;charset=utf-8'}), a=document.createElement('a');
+ a.href=URL.createObjectURL(blob); a.download='khatati-project.txt'; a.click(); URL.revokeObjectURL(a.href);
+}
+function answerFromLesson(){
+ const q=document.getElementById('ask').value.trim(), box=document.getElementById('askAnswer');
+ if(!q||!window.current){alert('أنشئ الدرس أولًا');return}
+ const source=window.current.text||'', ss=sentences(source), terms=words(q).filter(w=>w.length>2);
+ const ranked=ss.map(s=>({s,score:terms.reduce((n,w)=>n+(s.includes(w)?1:0),0)})).sort((a,b)=>b.score-a.score).filter(x=>x.score>0).slice(0,3);
+ if(!ranked.length) box.innerHTML='<div class="node">لم أجد إجابة مباشرة في النص. جرّب سؤالًا بكلمات موجودة في الدرس.</div>';
+ else box.innerHTML='<div class="node root">📌 الإجابة من الدرس</div>'+ranked.map(x=>'<div class="node">'+escapeHtml(x.s)+'</div>').join('');
+ box.classList.remove('hidden');
 }
 function saveProject(){let a=JSON.parse(localStorage.getItem('khatatiProjects')||'[]');a.unshift(window.current);localStorage.setItem('khatatiProjects',JSON.stringify(a.slice(0,30)));alert('تم حفظ المشروع على الهاتف')}
 function renderProjects(){let a=JSON.parse(localStorage.getItem('khatatiProjects')||'[]');document.getElementById('projects').innerHTML=a.length?a.map((p,i)=>'<div class="project"><span>📘 '+escapeHtml(p.title||'مشروع')+'</span><button onclick="openProject('+i+')">فتح</button></div>').join(''):'<p class="small">لا توجد مشاريع محفوظة بعد.</p>'}
