@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>خطاطتي v7</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f7f8fc;color:#172033;font-family:system-ui,-apple-system,"Noto Sans Arabic",sans-serif}
+header{padding:22px 18px 12px;background:white;position:sticky;top:0;z-index:5;border-bottom:1px solid #eee}
+.brand{font-size:25px;font-weight:800}.sub{color:#697386;font-size:13px;margin-top:4px}
+main{padding:14px 16px 92px}.hero{background:linear-gradient(135deg,#eef3ff,#fff);border:1px solid #dce4ff;border-radius:22px;padding:20px;margin-bottom:14px}
+.hero h1{margin:0 0 8px;font-size:24px}.hero p{margin:0;color:#596579;line-height:1.7}
+.card{background:white;border:1px solid #e8eaf0;border-radius:18px;padding:15px;margin-bottom:12px;box-shadow:0 4px 18px #1b2a4a08}
+label{display:block;font-weight:700;margin:8px 0}.row{display:flex;gap:8px;flex-wrap:wrap}
+button,select{border:0;border-radius:12px;padding:12px 14px;font-size:15px;background:#eef1f7;color:#172033}
+button.primary{background:#3657d6;color:white;font-weight:800;width:100%;margin-top:10px}
+textarea{width:100%;min-height:145px;border:1px solid #dfe3eb;border-radius:14px;padding:13px;font-size:16px;resize:vertical}
+.tabs{display:flex;gap:8px;overflow:auto;padding-bottom:5px}.tab{white-space:nowrap}.tab.active{background:#3657d6;color:#fff}
+#output h2{font-size:21px;margin:4px 0 10px}.node{border:1px solid #dfe4ef;border-radius:14px;padding:12px;margin:8px 0;background:#fafbff}
+.root{background:#eef3ff;border-color:#bfcaff;font-weight:800}.small{font-size:13px;color:#697386}
+nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e5e7ed;display:flex;justify-content:space-around;padding:9px;z-index:10}
+nav button{background:transparent;padding:7px 10px;font-size:12px}.hidden{display:none}
+.project{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee;padding:11px 0}
+</style></head>
+<body>
+<header><div class="brand">✦ خطاطتي</div><div class="sub">مساعدك الدراسي — v7 • يعمل بدون API</div></header>
+<main>
+<section id="home">
+<div class="hero"><h1>حوّل درسك إلى خريطة ذهنية</h1><p>اكتب موضوعك، واختر النتيجة التي تريدها. المعالجة محلية على الهاتف وبدون اشتراك.</p></div>
+<div class="card">
+<label>النمط</label><div class="tabs" id="modes">
+<button class="tab active" data-mode="student">🎓 طالب</button><button class="tab" data-mode="teacher">👨‍🏫 أستاذ</button>
+</div>
+<label>المستوى</label><select id="level"><option>ابتدائي</option><option>إعدادي</option><option selected>ثانوي</option><option>جامعي</option></select>
+<label>نوع النتيجة</label><div class="tabs" id="types">
+<button class="tab active" data-type="map">🧠 خريطة</button><button class="tab" data-type="lesson">📚 درس</button><button class="tab" data-type="summary">📝 ملخص</button><button class="tab" data-type="quiz">❓ أسئلة</button>
+</div>
+<label>الموضوع أو نص الدرس</label>
+<textarea id="input" placeholder="مثال: دورة الماء في الطبيعة..."></textarea>
+<button class="primary" onclick="generate()">إنشاء الآن ✨</button>
+</div>
+<div id="output" class="card hidden"></div>
+</section>
+<section id="library" class="hidden"><div class="card"><h2>📁 مشاريعي</h2><div id="projects"></div></div></section>
+<section id="settings" class="hidden"><div class="card"><h2>⚙️ الإعدادات</h2><p>خطاطتي v7 تعمل محليًا. لا يتم إرسال النص إلى أي خادم.</p><button onclick="localStorage.clear();renderProjects()">مسح المشاريع المحفوظة</button></div></section>
+</main>
+<nav><button onclick="show('home')">🏠<br>الرئيسية</button><button onclick="show('library');renderProjects()">📁<br>المشاريع</button><button onclick="show('settings')">⚙️<br>الإعدادات</button></nav>
+<script>
+let type='map',mode='student';
+document.querySelectorAll('#types .tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('#types .tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');type=b.dataset.type});
+document.querySelectorAll('#modes .tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('#modes .tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');mode=b.dataset.mode});
+function words(t){return t.replace(/[\n،؛:!?؟.,()\[\]{}"']/g,' ').split(/\s+/).filter(x=>x.length>3).filter((x,i,a)=>a.indexOf(x)===i).slice(0,12)}
+function sentences(t){return t.split(/[.!؟\n]+/).map(x=>x.trim()).filter(x=>x.length>12)}
+function generate(){
+ const t=document.getElementById('input').value.trim(); if(!t){alert('اكتب موضوعًا أولًا');return}
+ const ws=words(t), ss=sentences(t), title=ss[0]?ss[0].slice(0,55):ws.slice(0,5).join(' ');
+ let html='<h2>'+escapeHtml(title||'موضوع جديد')+'</h2>';
+ if(type==='map'){
+   html+='<div class="node root">الفكرة الرئيسية<br><span class="small">'+escapeHtml(title)+'</span></div>';
+   ws.slice(0,8).forEach((w,i)=>html+='<div class="node">🔹 '+escapeHtml(w)+'<div class="small">مفهوم مرتبط بالموضوع — فرع '+(i+1)+'</div></div>');
+ } else if(type==='summary'){
+   html+='<p><b>الخلاصة:</b> '+escapeHtml((ss.slice(0,4).join('. ')||t).slice(0,700))+'</p>';
+   html+='<div class="node">🔑 الكلمات المفتاحية: '+ws.slice(0,10).map(escapeHtml).join(' • ')+'</div>';
+ } else if(type==='lesson'){
+   html+='<div class="node root">🎯 الهدف</div><p>'+escapeHtml(ss[0]||t.slice(0,220))+'</p>';
+   ss.slice(1,6).forEach((s,i)=>html+='<div class="node"><b>الجزء '+(i+1)+'</b><br>'+escapeHtml(s)+'</div>');
+ } else {
+   const base=ws.slice(0,6);
+   html+='<div class="node root">اختبر نفسك</div>';
+   base.forEach((w,i)=>html+='<div class="node"><b>'+(i+1)+'. ما علاقة «'+escapeHtml(w)+'» بالموضوع؟</b><br><span class="small">اكتب إجابتك من الدرس.</span></div>');
+ }
+ html+='<button class="primary" onclick="saveProject()">💾 حفظ المشروع</button>';
+ const o=document.getElementById('output');o.innerHTML=html;o.classList.remove('hidden');o.scrollIntoView({behavior:'smooth'});
+ window.current={title,type,mode,level:document.getElementById('level').value,text:t,html};
+}
+function saveProject(){let a=JSON.parse(localStorage.getItem('khatatiProjects')||'[]');a.unshift(window.current);localStorage.setItem('khatatiProjects',JSON.stringify(a.slice(0,30)));alert('تم حفظ المشروع على الهاتف')}
+function renderProjects(){let a=JSON.parse(localStorage.getItem('khatatiProjects')||'[]');document.getElementById('projects').innerHTML=a.length?a.map((p,i)=>'<div class="project"><span>📘 '+escapeHtml(p.title||'مشروع')+'</span><button onclick="openProject('+i+')">فتح</button></div>').join(''):'<p class="small">لا توجد مشاريع محفوظة بعد.</p>'}
+function openProject(i){let a=JSON.parse(localStorage.getItem('khatatiProjects')||'[]');window.current=a[i];document.getElementById('output').innerHTML=a[i].html;document.getElementById('output').classList.remove('hidden');show('home')}
+function show(id){['home','library','settings'].forEach(x=>document.getElementById(x).classList.toggle('hidden',x!==id))}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+renderProjects();
+</script></body></html>
