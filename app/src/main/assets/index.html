@@ -2,151 +2,107 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>خطاطتي v7</title>
+<title>خطاطتي</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#f7f8fc;color:#172033;font-family:system-ui,-apple-system,"Noto Sans Arabic",sans-serif}
-header{padding:22px 18px 12px;background:white;position:sticky;top:0;z-index:5;border-bottom:1px solid #eee}
-.brand{font-size:25px;font-weight:800}.sub{color:#697386;font-size:13px;margin-top:4px}
-main{padding:14px 16px 92px}.hero{background:linear-gradient(135deg,#eef3ff,#fff);border:1px solid #dce4ff;border-radius:22px;padding:20px;margin-bottom:14px}
-.hero h1{margin:0 0 8px;font-size:24px}.hero p{margin:0;color:#596579;line-height:1.7}
-.card{background:white;border:1px solid #e8eaf0;border-radius:18px;padding:15px;margin-bottom:12px;box-shadow:0 4px 18px #1b2a4a08}
-label{display:block;font-weight:700;margin:8px 0}.row{display:flex;gap:8px;flex-wrap:wrap}
-button,select{border:0;border-radius:12px;padding:12px 14px;font-size:15px;background:#eef1f7;color:#172033}
-button.primary{background:#3657d6;color:white;font-weight:800;width:100%;margin-top:10px}
-textarea{width:100%;min-height:145px;border:1px solid #dfe3eb;border-radius:14px;padding:13px;font-size:16px;resize:vertical}
-.tabs{display:flex;gap:8px;overflow:auto;padding-bottom:5px}.tab{white-space:nowrap}.tab.active{background:#3657d6;color:#fff}
-#output h2{font-size:21px;margin:4px 0 10px}.node{border:1px solid #dfe4ef;border-radius:14px;padding:12px;margin:8px 0;background:#fafbff}
-.root{background:#eef3ff;border-color:#bfcaff;font-weight:800}.small{font-size:13px;color:#697386}
-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e5e7ed;display:flex;justify-content:space-around;padding:9px;z-index:10}
-nav button{background:transparent;padding:7px 10px;font-size:12px}.hidden{display:none}
-.project{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee;padding:11px 0}
-</style></head>
+:root{--bg:#f5f7fb;--card:#fff;--ink:#172033;--muted:#6b7280;--line:#e4e8f0;--primary:#3558d4;--soft:#eef2ff;--good:#15803d;--danger:#c62828}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans Arabic",sans-serif}
+header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:14px 16px}.brand{font-size:24px;font-weight:900}.sub{font-size:12px;color:var(--muted);margin-top:2px}
+main{max-width:760px;margin:auto;padding:14px 14px 90px}.screen{display:none}.screen.active{display:block}
+.hero{background:linear-gradient(135deg,#edf2ff,#fff);border:1px solid #d9e1ff;border-radius:22px;padding:20px;margin-bottom:12px}.hero h1{margin:0 0 7px;font-size:25px}.hero p{margin:0;color:#596579;line-height:1.7}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:15px;margin-bottom:12px;box-shadow:0 5px 22px #16204408}
+h2,h3{margin:3px 0 12px}.muted{color:var(--muted);font-size:13px}.label{font-weight:800;margin:10px 0 7px;display:block}
+textarea,input,select{width:100%;border:1px solid #d9dee8;border-radius:13px;background:#fff;padding:12px;font:inherit;color:inherit}textarea{min-height:135px;resize:vertical}
+button{border:0;border-radius:12px;padding:11px 13px;font:inherit;background:#eef1f7;color:var(--ink);font-weight:700}button:active{transform:scale(.98)}button.primary{background:var(--primary);color:#fff;width:100%;margin-top:9px}.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1;min-width:120px}
+.chips{display:flex;gap:7px;overflow:auto;padding-bottom:4px}.chip{white-space:nowrap}.chip.active{background:var(--primary);color:white}
+nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);z-index:30;display:flex;justify-content:space-around;padding:7px 4px calc(7px + env(safe-area-inset-bottom))}nav button{background:transparent;font-size:12px;padding:7px 10px}
+.node{background:#fafbff;border:1px solid #dfe5f0;border-radius:14px;padding:12px;margin:8px 0}.root{background:var(--soft);border-color:#bfcaff;font-weight:900}.branch{margin-right:16px}.node-actions{display:flex;gap:6px;margin-top:8px}.node-actions button{padding:6px 9px;font-size:12px}
+.answer{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:14px;padding:12px}.wrong{background:#fff5f5;border-color:#ffd0d0}
+.project{display:flex;gap:8px;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding:12px 0}.project:last-child{border-bottom:0}
+.progress{height:9px;background:#e9edf5;border-radius:99px;overflow:hidden}.progress>i{display:block;height:100%;background:var(--primary);width:0}
+.big{font-size:31px;font-weight:900}.center{text-align:center}.hidden{display:none!important}.toast{position:fixed;bottom:75px;left:15px;right:15px;background:#172033;color:#fff;padding:12px 15px;border-radius:13px;text-align:center;z-index:50}
+</style>
+</head>
 <body>
-<header><div class="brand">✦ خطاطتي</div><div class="sub">مساعدك الدراسي — v7.2 • دراسة وحل مسائل محليًا بدون API</div></header>
+<header><div class="brand">✦ خطاطتي</div><div class="sub">مساعد دراسي شامل • يعمل محليًا بدون API مدفوع</div></header>
 <main>
-<section id="home">
-<div class="hero"><h1>حوّل درسك إلى خريطة ذهنية</h1><p>اكتب موضوعك، واختر النتيجة التي تريدها. المعالجة محلية على الهاتف وبدون اشتراك.</p></div>
+<section id="home" class="screen active">
+<div class="hero"><h1>حوّل أي درس إلى أدوات للمذاكرة</h1><p>خريطة ذهنية، درس، ملخص، أسئلة، بطاقات مراجعة، ومساعد سؤال/جواب — مع حفظ مشاريعك على الهاتف.</p></div>
 <div class="card">
-<label>النمط</label><div class="tabs" id="modes">
-<button class="tab active" data-mode="student">🎓 طالب</button><button class="tab" data-mode="teacher">👨‍🏫 أستاذ</button>
+<div class="label">النمط</div><div class="chips" id="modes"><button class="chip active" data-v="student">🎓 طالب</button><button class="chip" data-v="teacher">👨‍🏫 أستاذ</button></div>
+<div class="label">المستوى</div><select id="level"><option>ابتدائي</option><option>إعدادي</option><option selected>ثانوي</option><option>جامعي</option></select>
+<div class="label">نوع النتيجة</div><div class="chips" id="types"><button class="chip active" data-v="map">🧠 خريطة</button><button class="chip" data-v="lesson">📚 درس</button><button class="chip" data-v="summary">📝 ملخص</button><button class="chip" data-v="quiz">❓ اختبار</button></div>
+<div class="label">الموضوع أو نص الدرس</div><textarea id="input" placeholder="اكتب موضوعًا أو الصق نص الدرس هنا..."></textarea>
+<div class="label">📎 ملف محلي</div><input id="file" type="file" accept=".txt,.md,.csv,image/*" onchange="readFile(this)">
+<div id="fileInfo" class="muted"></div>
+<button class="primary" onclick="generate()">إنشاء النتيجة ✨</button>
 </div>
-<label>المستوى</label><select id="level"><option>ابتدائي</option><option>إعدادي</option><option selected>ثانوي</option><option>جامعي</option></select>
-<label>نوع النتيجة</label><div class="tabs" id="types">
-<button class="tab active" data-type="map">🧠 خريطة</button><button class="tab" data-type="lesson">📚 درس</button><button class="tab" data-type="summary">📝 ملخص</button><button class="tab" data-type="quiz">❓ أسئلة</button>
-</div>
-<label>الموضوع أو نص الدرس</label>
-<textarea id="input" placeholder="مثال: دورة الماء في الطبيعة..."></textarea><label>📎 إضافة ملف</label><input id="file" type="file" accept=".txt,.md,.csv,image/*" onchange="readLocalFile(this)" style="width:100%;padding:10px;border:1px dashed #ccd2df;border-radius:12px;background:#fafbff">
-<button class="primary" onclick="generate()">إنشاء الآن ✨</button><div id="filePreview" class="small" style="margin-top:8px"></div>
-</div>
-<div class="card">
-<label>🧮 حل مسألة أو سؤال</label>
-<p class="small">اكتب المسألة كما هي، مثل: 25 × 4 أو 2x + 3 = 11 أو 20% من 150.</p>
-<textarea id="question" style="min-height:95px" placeholder="اكتب المسألة هنا..."></textarea>
-<button class="primary" onclick="solveQuestion()">حل المسألة الآن 🧮</button>
-<div id="answer" class="hidden" style="margin-top:12px"></div>
-</div>
-<div id="output" class="card hidden"></div>
+<div id="result" class="card hidden"></div>
+<div id="askCard" class="card hidden"><h3>💬 اسأل عن الدرس</h3><textarea id="ask" style="min-height:90px" placeholder="مثال: ما أهم فكرة في هذا الدرس؟"></textarea><button class="primary" onclick="askLesson()">أجب من النص</button><div id="askOut" class="hidden" style="margin-top:10px"></div></div>
 </section>
-<section id="library" class="hidden"><div class="card"><h2>📁 مشاريعي</h2><div id="projects"></div></div></section>
-<section id="settings" class="hidden"><div class="card"><h2>⚙️ الإعدادات</h2><p>خطاطتي v7 تعمل محليًا. لا يتم إرسال النص إلى أي خادم.</p><button onclick="localStorage.clear();renderProjects()">مسح المشاريع المحفوظة</button></div></section>
+
+<section id="library" class="screen">
+<div class="card"><h2>📁 مشاريعي</h2><input id="search" placeholder="بحث في المشاريع..." oninput="renderProjects()"><div id="projects"></div></div>
+</section>
+
+<section id="tools" class="screen">
+<div class="card"><h2>🧰 أدوات الدراسة</h2>
+<div class="row"><button onclick="makeFlashcards()">🃏 بطاقات</button><button onclick="startQuiz()">📝 اختبار</button></div>
+<div class="row" style="margin-top:8px"><button onclick="startTimer()">⏱️ جلسة 25 دقيقة</button><button onclick="newNote()">📌 ملاحظة</button></div>
+<div id="toolOut" style="margin-top:12px"></div></div>
+</section>
+
+<section id="settings" class="screen">
+<div class="card"><h2>⚙️ الإعدادات</h2><p class="muted">الإصدار 7.3 — المعالجة الأساسية محلية. لا يتم إرسال دروسك إلى خادم.</p>
+<div class="row"><button onclick="exportAll()">💾 تصدير المشاريع</button><button onclick="importAll()">📥 استيراد</button></div>
+<button onclick="clearAll()" style="margin-top:8px;width:100%">مسح جميع المشاريع</button></div>
+</section>
 </main>
-<nav><button onclick="show('home')">🏠<br>الرئيسية</button><button onclick="show('library');renderProjects()">📁<br>المشاريع</button><button onclick="show('settings')">⚙️<br>الإعدادات</button></nav>
+<nav><button onclick="show('home')">🏠<br>الرئيسية</button><button onclick="show('library');renderProjects()">📁<br>المشاريع</button><button onclick="show('tools')">🧰<br>الأدوات</button><button onclick="show('settings')">⚙️<br>الإعدادات</button></nav>
+<div id="toast" class="toast hidden"></div>
 <script>
-let type='map',mode='student';
-document.querySelectorAll('#types .tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('#types .tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');type=b.dataset.type});
-document.querySelectorAll('#modes .tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('#modes .tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');mode=b.dataset.mode});
-function words(t){return t.replace(/[\n،؛:!?؟.,()\[\]{}"']/g,' ').split(/\s+/).filter(x=>x.length>3).filter((x,i,a)=>a.indexOf(x)===i).slice(0,12)}
-function sentences(t){return t.split(/[.!؟\n]+/).map(x=>x.trim()).filter(x=>x.length>12)}
+let state={mode:'student',type:'map',current:null,flash:[],quiz:[],qi:0,timer:null};
+const $=id=>document.getElementById(id);
+document.querySelectorAll('#modes .chip').forEach(b=>b.onclick=()=>pick('#modes',b,v=>state.mode=v));
+document.querySelectorAll('#types .chip').forEach(b=>b.onclick=()=>pick('#types',b,v=>state.type=v));
+function pick(sel,b,fn){document.querySelectorAll(sel+' .chip').forEach(x=>x.classList.remove('active'));b.classList.add('active');fn(b.dataset.v)}
+function toast(s){$('toast').textContent=s;$('toast').classList.remove('hidden');setTimeout(()=>$('toast').classList.add('hidden'),2200)}
+function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));$(id).classList.add('active');window.scrollTo(0,0)}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function normalize(s){return String(s).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[−–—]/g,'-').replace(/×/g,'*').replace(/÷/g,'/').replace(/٪/g,'%')}
+function sentences(t){return normalize(t).split(/[.!؟\n]+/).map(x=>x.trim()).filter(x=>x.length>10)}
+function words(t){return normalize(t).replace(/[^\p{L}\p{N}\s]/gu,' ').split(/\s+/).filter(x=>x.length>2).filter((x,i,a)=>a.indexOf(x)===i).slice(0,18)}
+function titleOf(t){let s=sentences(t);return (s[0]||words(t).slice(0,6).join(' ')||'مشروع جديد').slice(0,70)}
+function readFile(el){let f=el.files&&el.files[0];if(!f)return;if(f.type.startsWith('image/')){$('fileInfo').textContent='🖼️ تمت إضافة الصورة: '+f.name+' — يمكن استخدامها كمرجع بصري.';return}if(!/text|csv|markdown/.test(f.type)&&!/\.(txt|md|csv)$/i.test(f.name)){toast('هذه النسخة المحلية تقرأ TXT/MD/CSV والصور. PDF/PPTX يحتاجان محرك ملفات مخصص.');return}let r=new FileReader();r.onload=()=>{$('input').value=String(r.result||'');$('fileInfo').textContent='📄 تم إدخال: '+f.name;};r.readAsText(f)}
 function generate(){
- const t=document.getElementById('input').value.trim(); if(!t){alert('اكتب موضوعًا أولًا');return}
- const ws=words(t), ss=sentences(t), title=ss[0]?ss[0].slice(0,55):ws.slice(0,5).join(' ');
- let html='<h2>'+escapeHtml(title||'موضوع جديد')+'</h2>';
- if(type==='map'){
-   html+='<div class="node root">الفكرة الرئيسية<br><span class="small">'+escapeHtml(title)+'</span></div>';
-   ws.slice(0,8).forEach((w,i)=>html+='<div class="node">🔹 '+escapeHtml(w)+'<div class="small">مفهوم مرتبط بالموضوع — فرع '+(i+1)+'</div></div>');
- } else if(type==='summary'){
-   html+='<p><b>الخلاصة:</b> '+escapeHtml((ss.slice(0,4).join('. ')||t).slice(0,700))+'</p>';
-   html+='<div class="node">🔑 الكلمات المفتاحية: '+ws.slice(0,10).map(escapeHtml).join(' • ')+'</div>';
- } else if(type==='lesson'){
-   html+='<div class="node root">🎯 الهدف</div><p>'+escapeHtml(ss[0]||t.slice(0,220))+'</p>';
-   ss.slice(1,6).forEach((s,i)=>html+='<div class="node"><b>الجزء '+(i+1)+'</b><br>'+escapeHtml(s)+'</div>');
- } else {
-   const base=ws.slice(0,6);
-   html+='<div class="node root">اختبر نفسك</div>';
-   base.forEach((w,i)=>html+='<div class="node"><b>'+(i+1)+'. ما علاقة «'+escapeHtml(w)+'» بالموضوع؟</b><br><span class="small">اكتب إجابتك من الدرس.</span></div>');
- }
- html+='<button class="primary" onclick="saveProject()">💾 حفظ المشروع</button><div class="row" style="margin-top:8px"><button onclick="copyOutput()">📋 نسخ</button><button onclick="downloadOutput()">⬇️ تصدير</button></div>';
- const o=document.getElementById('output');o.innerHTML=html;o.classList.remove('hidden');o.scrollIntoView({behavior:'smooth'});
- window.current={title,type,mode,level:document.getElementById('level').value,text:t,html}; document.getElementById('askCard').classList.remove('hidden');
+ let t=$('input').value.trim();if(!t){toast('اكتب الدرس أولًا');return}
+ let ss=sentences(t),ws=words(t),title=titleOf(t),html='<h2>'+esc(title)+'</h2>';
+ if(state.type==='map'){html+='<div class="node root">🎯 الفكرة الرئيسية<br><span class="muted">'+esc(title)+'</span></div>';ws.slice(0,10).forEach((w,i)=>html+='<div class="node branch"><b>🔹 '+esc(w)+'</b><div class="muted">مفهوم مرتبط • فرع '+(i+1)+'</div><div class="node-actions"><button onclick="renameNode(this)">✏️ تعديل</button><button onclick="this.closest(\'.node\').remove()">🗑️ حذف</button></div></div>');html+='<button onclick="addBranch()">➕ إضافة فرع</button>'}
+ if(state.type==='summary'){html+='<div class="node root">📝 الخلاصة</div><p>'+esc((ss.slice(0,5).join('. ')||t).slice(0,1100))+'</p><div class="node">🔑 <b>كلمات مفتاحية</b><br>'+ws.slice(0,12).map(esc).join(' • ')+'</div>'}
+ if(state.type==='lesson'){html+='<div class="node root">🎯 الهدف التعلمي</div><p>'+esc(ss[0]||t.slice(0,250))+'</p>';ss.slice(1,8).forEach((s,i)=>html+='<div class="node"><b>الجزء '+(i+1)+'</b><br>'+esc(s)+'</div>')}
+ if(state.type==='quiz'){html+='<div class="node root">📝 اختبار سريع</div>';ss.slice(0,8).forEach((s,i)=>{let q=s.split(/،|,/)[0];html+='<div class="node"><b>'+(i+1)+'. اشرح هذه الفكرة:</b><br>'+esc(q)+'<br><button onclick="this.nextElementSibling.classList.toggle(\'hidden\')">إظهار الإجابة</button><div class="answer hidden">'+esc(s)+'</div></div>'})}
+ html+='<div class="row" style="margin-top:10px"><button onclick="saveProject()">💾 حفظ</button><button onclick="copyResult()">📋 نسخ</button><button onclick="downloadResult()">⬇️ تصدير</button></div>';
+ $('result').innerHTML=html;$('result').classList.remove('hidden');$('askCard').classList.remove('hidden');
+ state.current={title,type:state.type,mode:state.mode,level:$('level').value,text:t,html:html};window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
 }
-function normalizeDigits(s){return String(s).replace(/[٠-٩]/g,d=>String('٠١٢٣٤٥٦٧٨٩'.indexOf(d))).replace(/[٫،]/g,'.').replace(/[−–—]/g,'-').replace(/×/g,'*').replace(/÷/g,'/').replace(/٪/g,'%').replace(/\s+/g,' ').trim()}
-function formatNum(n){return Number.isInteger(n)?String(n):String(Number(n.toFixed(8)))}
-function safeArithmetic(s){
- s=normalizeDigits(s).replace(/[^0-9+\\-*/().%^ ]/g,'').replace(/\^/g,'**');
- if(!/[0-9]/.test(s)||/[a-zA-Z]/.test(s)||!/[+*/%^\\-]/.test(s)) return null;
- try{if(!/^[0-9+\\-*/().%^ *]+$/.test(s))return null; const n=Function('"use strict";return ('+s+')')(); return Number.isFinite(n)?n:null}catch(e){return null}
-}
-function solveLinear(s){
- s=normalizeDigits(s).replace(/\s/g,'').replace(/×/g,'*');
- let m=s.match(/^([+-]?[0-9.]*)x([+-][0-9.]+)?=([+-]?[0-9.]+)$/i);
- if(!m)m=s.match(/^([+-]?[0-9.]+)x([+-][0-9.]+)?=([+-]?[0-9.]+)$/i);
- if(!m)return null;
- let a=m[1]===''||m[1]==='+'?1:m[1]==='-'?-1:parseFloat(m[1]);
- let b=m[2]?parseFloat(m[2]):0, d=parseFloat(m[3]);
- if(!Number.isFinite(a)||a===0)return null;
- return (d-b)/a;
-}
-function solveQuestion(){
- const raw=document.getElementById('question').value.trim(), q=normalizeDigits(raw);
- const box=document.getElementById('answer');
- if(!raw){alert('اكتب المسألة أولًا');return}
- let answer=null, steps='';
- const percent=q.match(/([0-9.]+)\s*%\s*(?:من|of)\s*([0-9.]+)/i);
- if(percent){answer=parseFloat(percent[1])*parseFloat(percent[2])/100;steps=percent[1]+'% من '+percent[2]+' = ('+percent[1]+'/100) × '+percent[2]}
- if(answer===null){
-   const eq=solveLinear(q.replace(/[^0-9xX+\-\.= ]/g,''));
-   if(eq!==null){answer=eq;steps='ننقل العدد الثابت للطرف الآخر ثم نقسم على معامل x.'}
- }
- if(answer===null){
-   const expr=q.replace(/(?:احسب|حل|يساوي|=)\s*/g,' ').replace(/[^0-9+\-*/().%^ ]/g,'').trim();
-   answer=safeArithmetic(expr);
-   if(answer!==null)steps='تم ترتيب العملية وتطبيق العمليات الحسابية.'
- }
- if(answer===null){
-   box.innerHTML='<div class="node"><b>لم أتعرف على المسألة بعد.</b><br><span class="small">جرّب عملية مثل 125 ÷ 5، أو معادلة مثل 2x + 3 = 11، أو نسبة مثل 20% من 150.</span></div>';
- }else{
-   box.innerHTML='<div class="node root">✅ الحل: '+escapeHtml(formatNum(answer))+'</div><div class="node"><b>الطريقة:</b><br>'+escapeHtml(steps)+'</div>';
- }
- box.classList.remove('hidden'); box.scrollIntoView({behavior:'smooth'});
-}
-function readLocalFile(el){
- const f=el.files&&el.files[0]; if(!f)return;
- const p=document.getElementById('filePreview');
- if(f.type.startsWith('image/')){p.innerHTML='🖼️ تمت إضافة صورة: '+escapeHtml(f.name); return;}
- const r=new FileReader(); r.onload=()=>{document.getElementById('input').value=String(r.result||'');p.textContent='📄 تمت قراءة الملف: '+f.name}; r.readAsText(f);
-}
-function copyOutput(){
- const o=document.getElementById('output'); if(!o||o.classList.contains('hidden'))return;
- navigator.clipboard?.writeText(o.innerText||'').then(()=>alert('تم النسخ'));
-}
-function downloadOutput(){
- const o=document.getElementById('output'); if(!o||o.classList.contains('hidden'))return;
- const blob=new Blob([o.innerText||''],{type:'text/plain;charset=utf-8'}), a=document.createElement('a');
- a.href=URL.createObjectURL(blob); a.download='khatati-project.txt'; a.click(); URL.revokeObjectURL(a.href);
-}
-function answerFromLesson(){
- const q=document.getElementById('ask').value.trim(), box=document.getElementById('askAnswer');
- if(!q||!window.current){alert('أنشئ الدرس أولًا');return}
- const source=window.current.text||'', ss=sentences(source), terms=words(q).filter(w=>w.length>2);
- const ranked=ss.map(s=>({s,score:terms.reduce((n,w)=>n+(s.includes(w)?1:0),0)})).sort((a,b)=>b.score-a.score).filter(x=>x.score>0).slice(0,3);
- if(!ranked.length) box.innerHTML='<div class="node">لم أجد إجابة مباشرة في النص. جرّب سؤالًا بكلمات موجودة في الدرس.</div>';
- else box.innerHTML='<div class="node root">📌 الإجابة من الدرس</div>'+ranked.map(x=>'<div class="node">'+escapeHtml(x.s)+'</div>').join('');
- box.classList.remove('hidden');
-}
-function saveProject(){let a=JSON.parse(localStorage.getItem('khatatiProjects')||'[]');a.unshift(window.current);localStorage.setItem('khatatiProjects',JSON.stringify(a.slice(0,30)));alert('تم حفظ المشروع على الهاتف')}
-function renderProjects(){let a=JSON.parse(localStorage.getItem('khatatiProjects')||'[]');document.getElementById('projects').innerHTML=a.length?a.map((p,i)=>'<div class="project"><span>📘 '+escapeHtml(p.title||'مشروع')+'</span><button onclick="openProject('+i+')">فتح</button></div>').join(''):'<p class="small">لا توجد مشاريع محفوظة بعد.</p>'}
-function openProject(i){let a=JSON.parse(localStorage.getItem('khatatiProjects')||'[]');window.current=a[i];document.getElementById('output').innerHTML=a[i].html;document.getElementById('output').classList.remove('hidden');show('home')}
-function show(id){['home','library','settings'].forEach(x=>document.getElementById(x).classList.toggle('hidden',x!==id))}
-function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function renameNode(btn){let n=btn.closest('.node'),old=n.querySelector('b').innerText.replace('🔹 ','');let v=prompt('اسم الفرع',old);if(v)n.querySelector('b').innerText='🔹 '+v}
+function addBranch(){let n=document.createElement('div');n.className='node branch';n.innerHTML='<b>🔹 فرع جديد</b><div class="muted">اضغط تعديل لتغيير الاسم</div><div class="node-actions"><button onclick="renameNode(this)">✏️ تعديل</button><button onclick="this.closest(\'.node\').remove()">🗑️ حذف</button></div>';$('result').appendChild(n)}
+function saveProject(){if(!state.current)return;let a=JSON.parse(localStorage.getItem('kp')||'[]');a.unshift({...state.current,id:Date.now()});localStorage.setItem('kp',JSON.stringify(a.slice(0,50)));toast('تم حفظ المشروع على الهاتف')}
+function renderProjects(){let a=JSON.parse(localStorage.getItem('kp')||'[]'),q=($('search')?.value||'').toLowerCase();a=a.filter(p=>(p.title||'').toLowerCase().includes(q));$('projects').innerHTML=a.length?a.map((p,i)=>'<div class="project"><div>📘 '+esc(p.title)+'<div class="muted">'+esc(p.type)+' • '+esc(p.level)+'</div></div><div class="row"><button onclick="openProject('+i+')">فتح</button><button onclick="delProject('+i+')">🗑️</button></div></div>').join(''):'<p class="muted">لا توجد مشاريع.</p>'}
+function openProject(i){let a=JSON.parse(localStorage.getItem('kp')||'[]');let q=($('search')?.value||'').toLowerCase();a=a.filter(p=>(p.title||'').toLowerCase().includes(q));state.current=a[i];$('result').innerHTML=a[i].html;$('result').classList.remove('hidden');show('home')}
+function delProject(i){let a=JSON.parse(localStorage.getItem('kp')||'[]');a.splice(i,1);localStorage.setItem('kp',JSON.stringify(a));renderProjects()}
+function askLesson(){let q=$('ask').value.trim(),p=state.current;if(!q||!p){toast('أنشئ درسًا أولًا');return}let terms=words(q),ss=sentences(p.text),rank=ss.map(s=>({s,n:terms.reduce((n,w)=>n+(s.toLowerCase().includes(w.toLowerCase())?1:0),0)})).sort((a,b)=>b.n-a.n).filter(x=>x.n).slice(0,4);$('askOut').innerHTML=rank.length?'<div class="answer"><b>📌 من نص الدرس:</b><br>'+rank.map(x=>'<p>'+esc(x.s)+'</p>').join('')+'</div>':'<div class="node">لم أجد إجابة مباشرة في النص. استخدم كلمات من الدرس في السؤال.</div>';$('askOut').classList.remove('hidden')}
+function makeFlashcards(){if(!state.current){toast('أنشئ درسًا أولًا');return}let ss=sentences(state.current.text).slice(0,10);state.flash=ss.map((s,i)=>({q:'ما الفكرة الأساسية في البطاقة '+(i+1)+'؟',a:s}));let i=0;$('toolOut').innerHTML='<h3>🃏 بطاقات المراجعة</h3><div id="fc" class="node root">'+esc(state.flash[0].q)+'</div><button onclick="flipCard()">إظهار الإجابة</button> <button onclick="nextCard()">التالي</button>'}
+let fi=0,flipped=false;function flipCard(){if(!state.flash.length)return;flipped=!flipped;$('fc').innerHTML=esc(flipped?state.flash[fi].a:state.flash[fi].q)}function nextCard(){if(!state.flash.length)return;fi=(fi+1)%state.flash.length;flipped=false;flipCard()}
+function startQuiz(){if(!state.current){toast('أنشئ درسًا أولًا');return}let ss=sentences(state.current.text).slice(0,6);state.quiz=ss.map((s,i)=>({q:'أي عبارة تعبّر عن الفكرة رقم '+(i+1)+'؟',opts:[s,'عبارة غير مذكورة في النص','لا توجد علاقة','كل ما سبق'],ans:0}));state.qi=0;renderQuiz()}
+function renderQuiz(){let q=state.quiz[state.qi];if(!q){$('toolOut').innerHTML='<div class="answer center"><div class="big">🎉</div><h3>انتهى الاختبار</h3></div>';return}$('toolOut').innerHTML='<h3>📝 السؤال '+(state.qi+1)+' / '+state.quiz.length+'</h3><div class="node">'+esc(q.q)+'</div>'+q.opts.map((o,i)=>'<button style="width:100%;margin:4px 0" onclick="answerQuiz('+i+')">'+esc(o)+'</button>').join('')+'<div class="progress" style="margin-top:10px"><i style="width:'+((state.qi/state.quiz.length)*100)+'%"></i></div>'}
+function answerQuiz(i){let q=state.quiz[state.qi];if(i===q.ans)toast('إجابة صحيحة ✅');else toast('الإجابة الصحيحة هي الأولى');state.qi++;setTimeout(renderQuiz,500)}
+function startTimer(){let sec=1500;clearInterval(state.timer);$('toolOut').innerHTML='<div class="center"><div id="clock" class="big">25:00</div><p class="muted">جلسة تركيز</p><button onclick="clearInterval(state.timer)">إيقاف</button></div>';state.timer=setInterval(()=>{sec--;let m=Math.floor(sec/60),s=sec%60;if($('clock'))$('clock').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');if(sec<=0){clearInterval(state.timer);toast('انتهت جلسة التركيز 🎉')}},1000)}
+function newNote(){let n=prompt('اكتب الملاحظة');if(!n)return;let a=JSON.parse(localStorage.getItem('notes')||'[]');a.unshift({text:n,date:new Date().toLocaleString()});localStorage.setItem('notes',JSON.stringify(a));toast('تم حفظ الملاحظة')}
+function copyResult(){if(!$('result').innerText)return;navigator.clipboard?.writeText($('result').innerText);toast('تم النسخ')}
+function downloadResult(){let b=new Blob([$('result').innerText],{type:'text/plain;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='khatati.txt';a.click();URL.revokeObjectURL(a.href)}
+function exportAll(){let data=localStorage.getItem('kp')||'[]',b=new Blob([data],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='khatati-projects.json';a.click();URL.revokeObjectURL(a.href)}
+function importAll(){let i=document.createElement('input');i.type='file';i.accept='.json';i.onchange=()=>{let r=new FileReader();r.onload=()=>{try{localStorage.setItem('kp',JSON.stringify(JSON.parse(r.result)));renderProjects();toast('تم الاستيراد')}catch(e){toast('ملف غير صالح')}};r.readAsText(i.files[0])};i.click()}
+function clearAll(){if(confirm('مسح جميع المشاريع؟')){localStorage.removeItem('kp');renderProjects();toast('تم المسح')}}
 renderProjects();
-</script></body></html>
+</script>
+</body></html>
