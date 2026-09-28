@@ -8,7 +8,9 @@ android {
         applicationId 'com.khatati.app'
         minSdk 23
         targetSdk 35
-        versionCode 7
-        versionName '7.0'
+        versionCode 11
+        versionName '11.0'
     }
 }
+
+android { buildTypes { release { minifyEnabled false } } }
