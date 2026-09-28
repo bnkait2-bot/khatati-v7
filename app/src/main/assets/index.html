@@ -53,6 +53,26 @@ nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid 
 <div id="askCard" class="card hidden"><h3>💬 اسأل عن الدرس</h3><textarea id="ask" style="min-height:90px" placeholder="مثال: ما أهم فكرة في هذا الدرس؟"></textarea><button class="primary" onclick="askLesson()">أجب من النص</button><div id="askOut" class="hidden" style="margin-top:10px"></div></div>
 </section>
 
+<section id="learn" class="screen">
+<div class="hero future"><h1>🌍 مكتبة التعلم عبر الإنترنت</h1><p>ابحث عن درس أو مفهوم، وسيجلب خطاطتي محتوى تعليميًا من الويب ثم يرتبه لك داخل التطبيق.</p></div>
+<div class="card"><h2>📚 مواد سريعة</h2>
+<div class="future-grid">
+<button class="future-tile" onclick="learnTopic('الرياضيات')">➗ <b>الرياضيات</b><span class="muted">مفاهيم وتمارين</span></button>
+<button class="future-tile" onclick="learnTopic('الفيزياء')">⚛️ <b>الفيزياء</b><span class="muted">قوانين ومفاهيم</span></button>
+<button class="future-tile" onclick="learnTopic('الكيمياء')">🧪 <b>الكيمياء</b><span class="muted">تفاعلات وعناصر</span></button>
+<button class="future-tile" onclick="learnTopic('علم الأحياء')">🧬 <b>الأحياء</b><span class="muted">الخلايا والكائنات</span></button>
+<button class="future-tile" onclick="learnTopic('التاريخ')">🏛️ <b>التاريخ</b><span class="muted">أحداث وحضارات</span></button>
+<button class="future-tile" onclick="learnTopic('البرمجة')">💻 <b>البرمجة</b><span class="muted">مفاهيم وتقنيات</span></button>
+</div>
+<label class="label">🔎 ابحث عن أي درس</label>
+<div class="row"><input id="learnQuery" placeholder="مثال: قوانين نيوتن، التفاضل، الخلية..." /><button onclick="learnSearch()">🌐 تعلم</button></div></div>
+<div id="learnOut" class="card hidden"></div>
+<div class="card"><h2>📖 مكتبات تعليمية مفتوحة</h2><div class="row">
+<button onclick="openEdu('https://openstax.org/subjects')">📚 OpenStax</button>
+<button onclick="openEdu('https://ar.wikipedia.org/')">🌐 ويكيبيديا العربية</button>
+</div><p class="muted">المصادر الخارجية تحتاج إلى اتصال بالإنترنت وقد تتغير.</p></div>
+</section>
+
 <section id="library" class="screen">
 <div class="card"><h2>📁 مشاريعي</h2><input id="search" placeholder="بحث في المشاريع..." oninput="renderProjects()"><div id="projects"></div></div>
 </section>
@@ -70,7 +90,7 @@ nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid 
 <button onclick="clearAll()" style="margin-top:8px;width:100%">مسح جميع المشاريع</button></div>
 </section>
 </main>
-<nav><button onclick="show('home')">🏠<br>الرئيسية</button><button onclick="show('library');renderProjects()">📁<br>المشاريع</button><button onclick="show('tools')">🧰<br>الأدوات</button><button onclick="show('settings')">⚙️<br>الإعدادات</button></nav>
+<nav><button onclick="show('home')">🏠<br>الرئيسية</button><button onclick="show('learn')">🌍<br>التعلم</button><button onclick="show('library');renderProjects()">📁<br>المشاريع</button><button onclick="show('tools')">🧰<br>الأدوات</button><button onclick="show('settings')">⚙️<br>الإعدادات</button></nav>
 <div id="toast" class="toast hidden"></div>
 <script>
 let state={mode:'student',type:'map',style:'مختصر',current:null,flash:[],quiz:[],qi:0,timer:null,webAnswer:''};
@@ -142,6 +162,24 @@ function importAll(){let i=document.createElement('input');i.type='file';i.accep
 function clearAll(){if(confirm('مسح جميع المشاريع؟')){localStorage.removeItem('kp');renderProjects();toast('تم المسح')}}
 renderProjects();
 
+function openEdu(url){window.open(url,'_blank','noopener')}
+function learnTopic(q){$('learnQuery').value=q;learnSearch()}
+async function learnSearch(){
+ const q=$('learnQuery').value.trim();
+ if(!q){toast('اكتب موضوعًا للتعلم');return}
+ const out=$('learnOut');out.classList.remove('hidden');out.innerHTML='<h2>⏳ جارٍ جلب الدرس</h2><p class="muted">أبحث في المصادر التعليمية المفتوحة…</p>';
+ let wiki=null;
+ try{wiki=await fetchJson('https://ar.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(q.replace(/\s+/g,'_')),8000)}catch(e){}
+ if(wiki&&wiki.extract){
+   const title=wiki.title||q, img=wiki.thumbnail?.source||'', page=wiki.content_urls?.desktop?.page||'https://ar.wikipedia.org/';
+   out.innerHTML='<h2>📘 '+esc(title)+'</h2>'+(img?'<img src="'+esc(img)+'" style="width:100%;max-height:220px;object-fit:cover;border-radius:15px" alt="">':'')+'<p style="line-height:2">'+esc(wiki.extract)+'</p><div class="row"><button onclick="setLearnAnswer('+JSON.stringify(wiki.extract)+',\'map\')">🧠 خريطة</button><button onclick="setLearnAnswer('+JSON.stringify(wiki.extract)+',\'lesson\')">📚 درس</button><button onclick="setLearnAnswer('+JSON.stringify(wiki.extract)+',\'quiz\')">🎯 اختبار</button></div><p class="source">المصدر: <a target="_blank" rel="noopener" href="'+esc(page)+'">ويكيبيديا العربية</a></p>';
+ }else{
+   out.innerHTML='<h2>🔎 لم أجد صفحة مباشرة</h2><p>يمكنك فتح بحث الويب أو إرسال السؤال إلى مساعد خطاطتي.</p><div class="row"><button onclick="webSearchExternal('+JSON.stringify(q)+')">🌐 بحث الويب</button><button onclick="askOnline('+JSON.stringify(q)+')">✦ اسأل خطاطتي</button></div>';
+ }
+}
+function setLearnAnswer(txt,type){state.webAnswer=txt;$('input').value=txt;state.type=type;document.querySelectorAll('#types .chip').forEach(x=>x.classList.toggle('active',x.dataset.v===type));generate();show('home')}
+function askOnline(q){$('chatInput').value='اشرح لي '+q;show('home');chatSearch()}
+function webSearchExternal(q){window.open('https://www.google.com/search?q='+encodeURIComponent(q+' تعليم درس'),'_blank','noopener')}
 function quickAsk(q){$('chatInput').value=q+' عن: '+($('input').value.trim()||'الموضوع');$('chatInput').focus();chatSearch()}
 function addSourceBadge(){return '<span style="font-size:11px;background:#eef2ff;padding:4px 7px;border-radius:99px">مصادر الويب</span>'}
 function localAnswer(q){
